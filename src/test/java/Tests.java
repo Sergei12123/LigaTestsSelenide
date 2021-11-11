@@ -1,21 +1,29 @@
+import com.codeborne.selenide.Browser;
 import com.codeborne.selenide.Condition;
-import org.junit.*;
+import io.qameta.allure.*;
+import org.junit.jupiter.api.*;
 
 import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+@Epic("Заявки")
 public class Tests {
-    @Before
+    @BeforeEach
     public void beforeAll(){
         System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
         System.setProperty("selenide.browser", "Chrome");
+
     }
 
     public void setPasoLog(){
         $(byId("login")).setValue("sealivanov");
         $(byId("pass")).setValue("Huvefe94").pressEnter();
     }
-
+    @Epic("Заявки на перевод")
+    @Feature("Заявка на перевод между блоками")
+    @Description("Создание заявки на перевод между блоками и отправка Ассистенту ПС")
+    @DisplayName("Заявка на перевод между блоками")
     @Test
     public void testTransferBetweenBlocks(){
         open("https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/services-transfer");
@@ -47,7 +55,10 @@ public class Tests {
         $(byText("Создать")).click();
         $(byText("Перейти к моим заявкам")).click();
     }
-
+    @Epic("Заявка на внешнее обучение")
+    @Feature("Заявка на внешнее обучение")
+    @Description("Создание заявки на внешнее обучение")
+    @DisplayName("Заявка на внешнее обучение")
     @Test
     public void testOutLearning(){
         open("https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/services/education");
@@ -67,7 +78,6 @@ public class Tests {
         //Указываем почту для регистрации (личная/внешняя)
         $(byAttribute("name","email-994112")).setValue("abcd@gmail.com");
         //Указываем даты
-
         $$(byAttribute("placeholder","Выберите даты")).first().click();
         $(byAttribute("aria-label","четверг, 11 ноября 2021 г.")).click();
         $(byAttribute("aria-label","вторник, 30 ноября 2021 г.")).click();
@@ -78,7 +88,7 @@ public class Tests {
         $(byText("Отправить")).click();
     }
 
-    @After
+    @AfterEach
     public void clearWebDriver() {
         try {
             closeWebDriver();
