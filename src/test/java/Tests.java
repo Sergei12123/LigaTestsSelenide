@@ -1,99 +1,72 @@
-import com.codeborne.selenide.Browser;
-import com.codeborne.selenide.Condition;
+import at.helpers.MyTestWatcher;
+import at.steps.UniversalSteps;
+import at.tagsForExecution.Ready;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import pages.IntranetMainPage;
+import pages.requests.MainRequestsPage;
+import pages.requests.OutLearningPage;
+import pages.requests.TransferBetweenBlocksPage;
 
-import static com.codeborne.selenide.Selectors.*;
-import static com.codeborne.selenide.Selenide.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Epic("Заявки")
+@ExtendWith(MyTestWatcher.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class Tests {
-    @BeforeEach
-    public void beforeAll(){
-        System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
-        System.setProperty("selenide.browser", "Chrome");
 
-    }
-
-    public void setPasoLog(){
-        $(byId("login")).setValue("sealivanov");
-        $(byId("pass")).setValue("Huvefe94").pressEnter();
-    }
-    @Epic("Заявки на перевод")
     @Feature("Заявка на перевод между блоками")
     @Description("Создание заявки на перевод между блоками и отправка Ассистенту ПС")
     @DisplayName("Заявка на перевод между блоками")
+    @Order(1)
     @Test
+    @Ready
     public void testTransferBetweenBlocks(){
-        open("https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/services-transfer");
-        setPasoLog();
+        UniversalSteps.userLoginWithRole("Ассистент","Intranet");
         //Выбираем нужную заявку
-        while(!$(".services-add-button__text").exists())
-            sleep(2000);
-        $(".services-add-button__text").should(Condition.exist).click();
-        $(byText("Перевод между блоками")).click();
+        new IntranetMainPage().goToTab("Заявки");
+        MainRequestsPage mainRequestsPage=new MainRequestsPage();
+        mainRequestsPage.chooseNeededRequest("Перевод между блоками");
         //Выбираем кандидата
-        $(byId("services-search-input")).setValue("Иванов ");
-        while (!$(byClassName("services__dropdown-search-person")).exists())
-            sleep(1500);
-        $$(byClassName("services__dropdown-search-person")).first().click();
-        //Выбираем блок для перевода
-        $(byAttribute("data-name","department_parent_id")).click();
-        $$(byCssSelector("[data-id=\"547\"][ data-name=\"department_parent_id\"]")).find(Condition.exactText("Блок Восток")).click();
+        TransferBetweenBlocksPage transferBetweenBlocksPage= new TransferBetweenBlocksPage();
+        transferBetweenBlocksPage.chooseCandidat("Иванов");
+        transferBetweenBlocksPage.chooseBlock("Блок Восток");
         //Выбираем практику для перевода
-        $(byAttribute("data-name","department_id")).click();
-        $$(byCssSelector("[data-id=\"547\"][ data-name=\"department_id\"]")).find(Condition.exactText("Smart-City")).click();
+        transferBetweenBlocksPage.choosePractic("Smart-City");
         //Выбираем руководителя
-        $(byAttribute("placeholder","Введите ФИО сотрудника")).setValue("А");
-        while (!$(".transfer__data-search-person").exists())
-            sleep(500);
-        $$(".transfer__data-search-person").first().click();
+        transferBetweenBlocksPage.chooseManager("а");
         //Указываем ЗП
-        $(byAttribute("data-name","full_salary")).setValue("100000");
+        transferBetweenBlocksPage.setSalary(100000);
         //Завершаем создание заявки
-        $(byText("Создать")).click();
-        $(byText("Перейти к моим заявкам")).click();
+        transferBetweenBlocksPage.clickCreateRequest();
     }
-    @Epic("Заявка на внешнее обучение")
     @Feature("Заявка на внешнее обучение")
     @Description("Создание заявки на внешнее обучение")
     @DisplayName("Заявка на внешнее обучение")
+    @Order(2)
+    @Ready
     @Test
     public void testOutLearning(){
-        open("https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/services/education");
-        setPasoLog();
+        UniversalSteps.userLoginWithRole("Ассистент","Intranet");
         //Выбираем нужную заявку
-        while(!$(".services-add-button__text").exists())
-            sleep(2000);
-        $(".services-add-button__text").should(Condition.exist).click();
-        $(byText("Создать")).click();
-
+        new IntranetMainPage().goToTab("Заявки");
+        MainRequestsPage mainRequestsPage=new MainRequestsPage();
+        mainRequestsPage.chooseNeededRequest("Внешнее обучение");
         //Указываем учебный центр
-        $(byAttribute("name","edu_facility")).setValue("МГУ");
+        OutLearningPage outLearningPage=new OutLearningPage();
+        outLearningPage.setCollege("МГУ");
         //Указываем название мероприятия
-        $(byAttribute("name","course")).setValue("Java");
+        outLearningPage.setCourse("Java");
         //Указываем формат мероприятия/тип билета
-        $(byAttribute("name","format")).setValue("Дистанционный");
+        outLearningPage.setType("Дистанционный");
         //Указываем почту для регистрации (личная/внешняя)
-        $(byAttribute("name","email-994112")).setValue("abcd@gmail.com");
+        outLearningPage.setMail("abcd@gmail.com");
         //Указываем даты
-        $$(byAttribute("placeholder","Выберите даты")).first().click();
-        $(byAttribute("aria-label","четверг, 11 ноября 2021 г.")).click();
-        $(byAttribute("aria-label","вторник, 30 ноября 2021 г.")).click();
-        $(byAttribute("name","url")).setValue("https://www.mirea.ru");
+        outLearningPage.setDate("20.11.2021","21.12.2022");
+        outLearningPage.setURL("https://www.mirea.ru");
         //Указываем стоимость
-        $(byAttribute("name","price")).setValue("10000");
+        outLearningPage.setPrice(10000);
         //Завершаем создание заявки
-        $(byText("Отправить")).click();
-    }
-
-    @AfterEach
-    public void clearWebDriver() {
-        try {
-            closeWebDriver();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        outLearningPage.clickSendRequest();
     }
 }

@@ -12,20 +12,66 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <aspectj.version>1.8.10</aspectj.version>
-        <allure-junit5.version>2.13.1</allure-junit5.version>
+        <aspectj.version>1.9.7</aspectj.version>
+        <allure-junit5.version>2.16.1</allure-junit5.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <lombok.version>1.18.22</lombok.version>
 
 
         <threadCount>2</threadCount>
         <forkCount>4</forkCount>
+        <tagForAll>Ready</tagForAll>
         <tagForParallel>Ready</tagForParallel>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
 
     </properties>
     <profiles>
+        <profile>
+            <id>runByTagsInOrder</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <testFailureIgnore>true</testFailureIgnore>
+                            <argLine>
+                                -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.8.10/aspectjweaver-1.8.10.jar"
+                            </argLine>
+                            <properties>
+                                <groups>${tagForAll}</groups>
+                                <property>
+                                    <name>listener</name>
+                                    <value>io.qameta.allure.junit5.AllureJunit5</value>
+                                </property>
+                            </properties>
+                            <systemProperties>
+                                <property>
+                                    <name>allure.results.directory</name>
+                                    <value>${project.build.directory}/allure-results</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.aspectj</groupId>
+                                <artifactId>aspectjweaver</artifactId>
+                                <version>${aspectj.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <version>3.7.1</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>runByTagsParallel</id>
             <build>
@@ -37,15 +83,16 @@
                             <forkCount>4</forkCount>
                             <reuseForks>false</reuseForks>
                             <useSystemClassLoader>false</useSystemClassLoader>
-                            <testFailureIgnore>false</testFailureIgnore>
+                            <testFailureIgnore>true</testFailureIgnore>
                             <argLine>
-                                -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.8.10/aspectjweaver-1.8.10.jar"                    </argLine>
+                                -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.8.10/aspectjweaver-1.8.10.jar"
+                            </argLine>
                             <properties>
                                 <configurationParameters>
                                     junit.jupiter.execution.parallel.enabled=true
                                     junit.jupiter.execution.parallel.mode.default=concurrent
                                 </configurationParameters>
-                                <includeTags>${tagForParallel}</includeTags>
+                                <groups>${tagForParallel}</groups>
                                 <property>
                                     <name>listener</name>
                                     <value>io.qameta.allure.junit5.AllureJunit5</value>
@@ -98,14 +145,72 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.5.2</version>
+            <version>5.8.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.yandex.qatools.allure</groupId>
+            <artifactId>allure-junit-adaptor</artifactId>
+            <version>1.5.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
             <version>${allure-junit5.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.14.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-selenide</artifactId>
+            <version>2.16.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>
