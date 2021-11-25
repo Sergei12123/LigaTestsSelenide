@@ -1,8 +1,8 @@
 package at.utils.allure;
 
-import ru.yandex.qatools.allure.annotations.Attachment;
-import ru.yandex.qatools.allure.annotations.Step;
-import io.qameta.allure.selenide.AllureSelenide;
+
+import io.qameta.allure.Attachment;
+import io.qameta.allure.Step;
 public class AllureReport {
     public AllureReport() {
     }

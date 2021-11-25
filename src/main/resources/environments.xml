@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environments>
-    <environment name="intranet">
+    <environment name="test-intranet">
         <ligaEndpoints>
             <ligaEndpoint alias="intranetEndpoint">https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/auth?redirect=%2F</ligaEndpoint>
         </ligaEndpoints>
-<!--        <databases>-->
-<!--            <database alias="SIEBEL">-->
-<!--                <protocol>tcp</protocol>-->
-<!--                <host>sbl-leto-devdb.sbl.local</host>-->
-<!--                <port>1521</port>-->
-<!--                <serviceName>PBSBLDEV</serviceName>-->
-<!--            </database>-->
-<!--        </databases>-->
+        <databases>
+            <database alias="crc_694_ontest_26fcfb5c">
+                <serviceName>Intranet</serviceName>
+                <protocol>ssh</protocol>
+                <host>test-intranet.digitalleague.ru</host>
+                <user>user</user>
+                <userPass>H9e5jh4)Xatu</userPass>
+                <port>22</port>
+                <databaseName>postgres</databaseName>
+                <databasePass>XvgNSV4waBxh</databasePass>
+            </database>
+        </databases>
         <users>
             <user alias="sealivanov">
                 <name>sealivanov</name>-=
                 <password>Huvefe94</password>
-                <role>Ассистент</role>
+                <role>Администратор</role>
             </user>
         </users>
     </environment>

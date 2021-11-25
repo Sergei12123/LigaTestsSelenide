@@ -34,6 +34,7 @@ public class Context {
      * @return Map - key - переменная, value - объект
      */
     public static Map<String, Object> getSavedObjects() {
+        LOG.info("Возвращает объекты из контекста");
         return savedObjects.get();
     }
 
@@ -43,6 +44,7 @@ public class Context {
      * @param object объект
      */
     public static void saveObject(String name, Object object) {
+        LOG.info("Происходит сохранение объекта \""+name+"\"");
         savedObjects.get().put(name.toLowerCase(), object);
     }
 
@@ -54,6 +56,7 @@ public class Context {
      */
     public static Object getSavedObject(String name) {
         Object result = savedObjects.get().get(name.toLowerCase());
+        LOG.info("Происходит возвращение объекта \""+name+"\" из контекста");
         if (result == null) {
             LOG.error("Can not find object {}. Please check object name.", name);
             throw new ParserException("Can not find object " + name + ". Please check object name.");

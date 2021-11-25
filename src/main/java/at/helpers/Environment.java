@@ -13,12 +13,17 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 @Getter
 public class Environment {
+    private String name;
     private Document document;
     private String mainUrl;
     private String[][] apps;
+    public Map<String, Map<String, String>> databases = new HashMap();
     private User[] users;
     private Element environment;
 
@@ -40,9 +45,9 @@ public class Environment {
 
     }
     private void setAllData() {
-        this.setEnvironment("intranet");
+        this.setEnvironment("test-intranet");
         this.setLigaEndpoints();
-//        this.setApps();
+        this.setDatabaseProperties();
         this.setUsers();
     }
     private void setEnvironment(String environment) {
@@ -54,6 +59,7 @@ public class Environment {
                 String name = element.getAttribute("name");
                 if (name != null && name.equalsIgnoreCase(environment)) {
                     this.environment = element;
+                    this.name=name;
                 }
             }
 
@@ -67,6 +73,33 @@ public class Environment {
             Assertions.fail("Тестовое окружение не определено!");
         }
     }
+
+    private void setDatabaseProperties() {
+        NodeList nodeList = this.environment.getElementsByTagName("databases");
+        if (nodeList != null && nodeList.getLength() >= 1) {
+            NodeList databases = ((Element)nodeList.item(0)).getElementsByTagName("database");
+
+            for(int i = 0; i < databases.getLength(); ++i) {
+                Node database = databases.item(i);
+                Map<String, String> databaseParameters = new HashMap();
+                databaseParameters.put("serviceName", this.getTagValue(database, "serviceName"));
+                databaseParameters.put("protocol", this.getTagValue(database, "protocol"));
+                databaseParameters.put("host", this.getTagValue(database, "host"));
+                databaseParameters.put("user", this.getTagValue(database, "user"));
+                databaseParameters.put("userPass", this.getTagValue(database, "userPass"));
+                databaseParameters.put("port", this.getTagValue(database, "port"));
+                databaseParameters.put("databaseName", this.getTagValue(database, "databaseName"));
+                databaseParameters.put("databasePass", this.getTagValue(database, "databasePass"));
+
+                this.databases.put(this.getTagAttribute(database, "alias"), databaseParameters);
+            }
+
+        } else {
+            System.out.println("Tag 'databases' is undefined");
+            Assertions.fail("Параметры баз данных не определены!");
+        }
+    }
+
     private void setUsers() {
         NodeList nodeList = this.environment.getElementsByTagName("users");
         if (nodeList != null && nodeList.getLength() >= 1) {
@@ -85,23 +118,6 @@ public class Environment {
             Assertions.fail("Список пользователей не определен!");
         }
     }
-
-//    private void setApps() {
-//        NodeList nodeList = this.environment.getElementsByTagName("applications");
-//        if (nodeList != null && nodeList.getLength() >= 1) {
-//            NodeList apps = ((Element)nodeList.item(0)).getElementsByTagName("application");
-//            this.apps = new String[apps.getLength()][2];
-//
-//            for(int i = 0; i < apps.getLength(); ++i) {
-//                Node app = apps.item(i);
-//                this.apps[i][0] = this.getTagAttribute(app, "alias");
-//                this.apps[i][1] = app.getTextContent();
-//            }
-//        } else {
-//            System.out.println("Tag 'applications' is undefined");
-//            Assertions.fail("Список приложений не определен!");
-//        }
-//    }
 
     private String getTagAttribute(Node node, String attribute) {
         return ((Element)node).getAttribute(attribute);

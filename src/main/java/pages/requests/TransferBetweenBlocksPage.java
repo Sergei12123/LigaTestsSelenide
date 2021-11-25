@@ -1,5 +1,6 @@
 package pages.requests;
 
+import at.utils.DocPath;
 import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
@@ -15,7 +16,7 @@ public class TransferBetweenBlocksPage {
     @Step("Выбрать кандидата")
     public void chooseCandidat(String name){
         Configuration.timeout = 30000;
-        $(byId("services-search-input")).setValue(name+" ");
+        $(byId("services-search-input")).shouldBe(Condition.exist).setValue(name+" ");
         $(byClassName("services__dropdown-search-person")).shouldBe(Condition.exist);
         $$(byClassName("services__dropdown-search-person")).first().click();
         Configuration.timeout = 4000;
@@ -24,13 +25,13 @@ public class TransferBetweenBlocksPage {
     @Step("Выбрать блок для перевода")
     public void chooseBlock(String block){
         $(byAttribute("data-name","department_parent_id")).click();
-        $$(byCssSelector("[data-id=\"547\"][ data-name=\"department_parent_id\"]")).find(Condition.exactText(block)).click();
+        $(byText(block)).click();
     }
 
     @Step("Выбрать практику для перевода")
     public void choosePractic(String practic){
         $(byAttribute("data-name","department_id")).click();
-        $$(byCssSelector("[data-id=\"547\"][ data-name=\"department_id\"]")).find(Condition.exactText(practic)).click();
+        $(byText(practic)).click();
     }
 
     @Step("Выбрать руководителя")
@@ -52,4 +53,14 @@ public class TransferBetweenBlocksPage {
         $(byText("Создать")).click();
         $(byText("Перейти к моим заявкам")).click();
     }
+
+    @Step("Указать новую ставку")
+    public void setNewRate(double newRate) {
+        $(byAttribute("data-name","employment")).setValue(Double.toString(newRate));
+        if($(byText("Прикрепить заявление")).exists()){
+            $(".transfer__data-file").sendKeys(System.getProperty("user.dir").concat(DocPath.BID_CHANGE_APPLICATION.getPath()));
+        }
+    }
+
+
 }

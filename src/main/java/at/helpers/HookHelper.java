@@ -1,11 +1,13 @@
 package at.helpers;
 
+import at.model.Database;
 import at.utils.allure.AllureHelper;
 import at.utils.allure.AllureReport;
 import com.codeborne.selenide.Selenide;
 import io.qameta.allure.Step;
 import lombok.extern.log4j.Log4j2;
 
+import managers.DatabaseManager;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
@@ -26,7 +28,7 @@ import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 @Log4j2
 public class HookHelper {
 
-//    private static final String DB_NAME = "SIEBEL";
+    private static Database database;
     private static Environment environment;
 
     public static final String DIRECTORY_PROJECT = System.getProperty("user.dir") + File.separator;
@@ -71,42 +73,12 @@ public class HookHelper {
      * @return Environment - свойство в формате xml
      */
     public static Environment getEnvironment() {
-        if (environment != null)
-            return environment;
-        File xml = new File("src/main/resources/environments.xml");
-        environment = new Environment(xml);
+        if (environment == null){
+            File xml = new File("src/main/resources/environments.xml");
+            environment = new Environment(xml);
+        }
         return environment;
     }
-
-
-
-    /**
-     * Установить свойства браузера
-     * @return DesiredCapabilities - свойства браузера
-     */
-//    public static DesiredCapabilities loadBrowserCapabilities() {
-//        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-//        ChromeOptions chromeOptions = new ChromeOptions();
-//        chromeOptions.addExtensions(new File("src/main/resources/extensions/ModifyHeaders_2.2.4_0.crx"));
-//        chromeOptions.setExperimentalOption("useAutomationExtension", false);
-//        chromeOptions.addArguments("--window-size=1280,1024", "--ignore-certificate-errors");
-//        Map<String, Object> prefs = new HashMap();
-//        prefs.put("credentials_enable_service", false);
-//        prefs.put("profile.password_manager_enabled", false);
-//        chromeOptions.setExperimentalOption("prefs", prefs);
-//        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-//        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-//        capabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR,
-//                UnexpectedAlertBehaviour.IGNORE);
-//        String tags = System.getProperty("cucumber.tags");
-//        if (tags != null) {
-//            capabilities.setCapability("name", tags);
-//        }
-//        capabilities.setCapability("enableVNC", true);
-//        capabilities.setCapability("screenResolution", "1920x1080x24");
-//        capabilities.setCapability("env", new String[]{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"});
-//        return capabilities;
-//    }
 
     /**
      * Запустить браузер
@@ -118,19 +90,27 @@ public class HookHelper {
         System.setProperty("selenide.browser", "Chrome");
     }
 
-//    /**
-//     * Подключение к базе данных
-//     * @param environment свойства среды
-//     */
-//    @Step("Инициализация БД")
-//    public static void initDatabaseSiebel(Environment environment) {
-//        if (DatabaseManager.getDatabase(DB_NAME) == null) {
-//            Map<String, String> databaseProp = environment.databases.get(DB_NAME);
-//            Database database = DatabaseManager.getDatabase(DB_NAME, databaseProp.get("host"),
-//                    databaseProp.get("port"), databaseProp.get("serviceName"), environment.users);
-//            database.setUser("siebel");
-//        }
-//    }
+    /**
+     * Подключение к базе данных
+     * @param alias свойства среды
+     */
+    @Step("Инициализация БД")
+    public static Database getDatabase(String alias) {
+        if(database==null){
+            Map<String, String> bd = HookHelper.getEnvironment().databases.get(alias);
+            database= new Database(alias,
+                    bd.get("serviceName"),
+                    bd.get("protocol"),
+                    bd.get("host"),
+                    bd.get("user"),
+                    bd.get("userPass"),
+                    bd.get("port"),
+                    bd.get("databaseName"),
+                    bd.get("databasePass"));
+            DatabaseManager.setDatabase(database);
+        }
+        return database;
+    }
 
 
     /**
@@ -150,14 +130,14 @@ public class HookHelper {
         }
     }
 
-//    /**
-//     * Закрыть подключение к БД
-//     */
-//    public static void clearDatabaseConnections() {
-//        if (DatabaseManager.getDatabase(SIEBEL_DB_NAME) != null) {
-//            DatabaseManager.setDatabase(null, SIEBEL_DB_NAME);
-//        }
-//    }
+    /**
+     * Закрыть подключение к БД
+     */
+    public static void clearDatabaseConnections() {
+        if (DatabaseManager.getDatabase() != null) {
+            DatabaseManager.setDatabase(null);
+        }
+    }
 
     /**
      * Закрыть браузер и подключение к системе Siebel

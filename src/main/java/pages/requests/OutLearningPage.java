@@ -1,5 +1,6 @@
 package pages.requests;
 
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +16,9 @@ import static com.codeborne.selenide.Selenide.$$;
 public class OutLearningPage {
     @Step("Указать учебный центр")
     public void setCollege(String college){
+        Configuration.timeout=30000;
         $(byAttribute("name","edu_facility")).setValue(college);
+        Configuration.timeout=4000;
     }
 
     @Step("Указать курс")

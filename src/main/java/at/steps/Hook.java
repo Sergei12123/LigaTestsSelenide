@@ -1,40 +1,40 @@
 package at.steps;
 
 import at.helpers.HookHelper;
+import at.helpers.MyTestWatcher;
 import at.parser.Context;
 import at.utils.allure.AllureHelper;
 import io.qameta.allure.Step;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.*;
 
+import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 
 /**
  * Класс содержит действия для каждого сценария или шага
  */
 @Log4j2
-public class Hook {
+public class Hook implements BeforeEachCallback, AfterEachCallback {
+    private static boolean started = false;
 
-//    /**
-//     * Подключение к базе данных
-//     */
-//    @BeforeEach
-//    @Order(1)
-//    @Step("Инициализация БД Siebel")
-//    public void initializeSiebelDB() {
-//        HookHelper.initDatabaseSiebel(HookHelper.getEnvironment());
-//    }
-
-
-
+    /**
+     * Подключение к базе данных
+     */
+    @BeforeEach
+    @Step("Инициализация БД 694")
+    public void initializeTest694DB() {
+        HookHelper.getDatabase("crc_694_ontest_26fcfb5c");
+        initializeWD();
+    }
 
     /**
      * Запуск браузера
      */
-    @BeforeEach
-    @Order(4)
     @Step("Инициализация браузера")
     public void initializeWD() {
         HookHelper.clearWebDriver();
@@ -46,8 +46,6 @@ public class Hook {
      *
      *
      */
-    @AfterEach
-    @Order(2)
     @Step("Дополнительная информация")
     public void addInformation() {
         HookHelper.printContext();
@@ -56,8 +54,6 @@ public class Hook {
     /**
      * Очистить контекст
      */
-    @AfterEach
-    @Order(1)
     @Step("Очистка контекста")
     public void clearContext() {
         AllureHelper.execIgnoreException("Очистка", () ->
@@ -71,7 +67,6 @@ public class Hook {
      * Закрыть браузер и закрыть подключение к БД
      */
     @AfterEach
-    @Order(0)
     @Step("Закрытие браузера и подключений к БД")
     public void clear() {
         AllureHelper.execIgnoreException("Закрытие браузера", () ->
@@ -81,11 +76,22 @@ public class Hook {
         });
         AllureHelper.execIgnoreException("Закрытие коннекта к БД", () ->
         {
-            //HookHelper.clearDatabaseConnections();
+            HookHelper.clearDatabaseConnections();
             HookHelper.clearWebDriver();
             return null;
         });
+        clearContext();
+        addInformation();
     }
 
+    @Override
+    public void afterEach(ExtensionContext extensionContext) throws Exception {
+        clear();
 
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext extensionContext) throws Exception {
+        initializeTest694DB();
+    }
 }

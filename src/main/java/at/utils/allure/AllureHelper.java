@@ -1,6 +1,7 @@
 package at.utils.allure;
 
 import io.qameta.allure.Allure;
+import io.qameta.allure.Attachment;
 import io.qameta.allure.Step;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
@@ -8,7 +9,6 @@ import io.qameta.allure.util.ResultsUtils;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import ru.yandex.qatools.allure.annotations.Attachment;
 
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
