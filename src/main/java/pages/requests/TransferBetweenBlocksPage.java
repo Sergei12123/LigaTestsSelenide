@@ -19,7 +19,7 @@ public class TransferBetweenBlocksPage {
         $(byId("services-search-input")).shouldBe(Condition.exist).setValue(name+" ");
         $(byClassName("services__dropdown-search-person")).shouldBe(Condition.exist);
         $$(byClassName("services__dropdown-search-person")).first().click();
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
     }
 
     @Step("Выбрать блок для перевода")
@@ -40,7 +40,7 @@ public class TransferBetweenBlocksPage {
         $(byAttribute("placeholder","Введите ФИО сотрудника")).setValue(manager+" ");
         $(".transfer__data-search-person").shouldBe(Condition.exist);
         $$(".transfer__data-search-person").first().click();
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
     }
 
     @Step("Указать желаемую ЗП")

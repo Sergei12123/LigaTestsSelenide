@@ -1,17 +1,25 @@
 package at.model;
 
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
+import at.parser.Context;
+import com.jcraft.jsch.*;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 
+import java.io.*;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.common.io.CharStreams.copy;
+import static java.lang.System.in;
+import static java.lang.Thread.sleep;
 
 @Getter
 public class Database {
@@ -20,15 +28,13 @@ public class Database {
     private final String serviceName;
     private final String protocol;
     private final String tunnelHost;
-    private String[][] users;
     private final String tunnelUser;
     private final String tunnelPassword;
     private final String tunnelPort;
-    private final String databaseName;
+    private final String databaseLogin;
     private final String databasePass;
-    private int sqlQueryTimeout = 300;
-    private String DB_URL;
     private int assinged_port;
+    private Logger LOG = LogManager.getLogger(Database.class);
 
 
     public Database(String alias, String serviceName, String protocol, String host, String user, String userPass, String port, String databaseName, String databasePass) {
@@ -39,17 +45,19 @@ public class Database {
         this.tunnelUser = user;
         this.tunnelPassword = userPass;
         this.tunnelPort = port;
-        this.databaseName = databaseName;
+        this.databaseLogin = databaseName;
         this.databasePass = databasePass;
     }
-    private Connection getConnection(String user, String password) {
-        if(DB_URL== null)
-            DB_URL="jdbc:postgresql://localhost:5432/postgres";
-        Session session=null;
 
-        JSch jSch=new JSch();
+    public ArrayList<String> executeQuerry(String sqlQuery) {
+        ArrayList<String> res = new ArrayList<>();
+        Session session=null;
+        JSch jsch=new JSch();
+        String command = "psql -h localhost -p 5432 -U "+ databaseLogin+" -d"+alias+" -W -c \""+sqlQuery+" \"";
+        LOG.info("Происходит попытка выполнить запрос в БД: "+sqlQuery.replaceAll("\\n"," " ));
+        System.out.println("");
         try {
-            session=jSch.getSession(tunnelUser,tunnelHost,Integer.parseInt(tunnelPort));
+            session=jsch.getSession(tunnelUser,tunnelHost,Integer.parseInt(tunnelPort));
             session.setPassword(tunnelPassword);
             Properties config=new Properties();
             config.put("StrictHostKeyChecking","no");
@@ -57,210 +65,126 @@ public class Database {
             config.put("ConnectionAttempts","2");
             session.setConfig(config);
             session.connect();
-
             assinged_port=session.setPortForwardingL(5432,tunnelHost,Integer.parseInt(tunnelPort) );
         } catch (JSchException e) {
             e.printStackTrace();
         }
-        StringBuilder url =
-                new StringBuilder("jdbc:postgresql://localhost:");
+        try {
+            Assertions.assertNotNull(session,"Сессия не была открыта, проверьте данные ssh");
+            Channel channel=session.openChannel("exec");
+            ((ChannelExec)channel).setCommand(command);
+            OutputStream out=channel.getOutputStream();
+            InputStream in=channel.getInputStream();
+            channel.connect();
+            out.write((databasePass+"\n").getBytes());
+            out.flush();
+            InputStream err=((ChannelExec) channel).getErrStream();
+            BufferedReader readerErr=new BufferedReader(new InputStreamReader(err));
+//            res.add(readerErr.readLine());
+//            String line;
 
-        // use assigned_port to establish database connection
-        url.append("5432").append ("/").append(databaseName);
+//            while((line = readerErr.readLine()) != null){
+//                if (line.isEmpty()) {
+//                    break;
+//                }
+//                res.add(line);
+//            }
+//
+//            res.remove(0);
+//            if(res.size()==0) {
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//                while ((line = reader.readLine()) != null) {
+//                    res.add(line);
+//                }
+//            }
 
-        if (user != null && !user.trim().isEmpty()) {
-            if (password != null && !password.trim().isEmpty()) {
+            StringBuilder resStr= new StringBuilder();
+            byte[] tmp=new byte[1024];
+            do{
+                int i=err.read(tmp, 0, 1024);
+                if(i<0)break;
+                resStr.append(new String(tmp, 0, i));
                 try {
-                    return DriverManager.getConnection(url.toString(),databaseName,databasePass);
-                } catch (Exception var4) {
-                    System.out.println("Attempt to get database connection failed");
-                    var4.printStackTrace();
-                    Assertions.fail("Не удалось установить соединение с базой данных!");
-                    return null;
-                }
-            } else {
-                System.out.println("Password is not specified");
-                Assertions.fail("Пароль пользователя базы данных не задан!");
-                return null;
-            }
-        } else {
-            System.out.println("User is not specified");
-            Assertions.fail("Пользователь базы данных не задан!");
-            return null;
-        }
-    }
-
-    private void closeConnection(Connection connection) {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (SQLException var3) {
-            System.out.println("Close connection failed");
-            var3.printStackTrace();
-            Assertions.fail("Не удалось закрыть соединение с базой данных!");
-        }
-
-    }
-
-    public ArrayList<Map<String, String>> select(String user, String password, String sqlQuery) {
-        Connection connection = this.getConnection(user, password);
-        Assertions.assertNotNull(connection, "Не удалось установить соединение с базой данных!");
-        System.out.println("SQL QUERY:\n  " + sqlQuery.replaceAll("\\n", "\n  "));
-        System.out.println("Execute SQL QUERY");
-
-        Throwable var6;
-        try {
-            Statement statement = connection.createStatement();
-            var6 = null;
-
-            try {
-                statement.setQueryTimeout(this.sqlQueryTimeout);
-                ResultSet resultSet = statement.executeQuery(sqlQuery);
-                System.out.println("  Success");
-                ResultSetMetaData metadata = resultSet.getMetaData();
-                int columnCount = metadata.getColumnCount();
-                ArrayList result = new ArrayList();
-
-                while(resultSet.next()) {
-                    Map<String, String> row = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-
-                    for(int i = 1; i <= columnCount; ++i) {
-                        row.put(metadata.getColumnName(i), resultSet.getString(i));
-                    }
-
-                    result.add(row);
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
-                ArrayList var33 = result;
-                return var33;
-            } catch (Throwable var29) {
-                var6 = var29;
-                throw var29;
-            } finally {
-                if (statement != null) {
-                    if (var6 != null) {
-                        try {
-                            statement.close();
-                        } catch (Throwable var28) {
-                            var6.addSuppressed(var28);
-                        }
-                    } else {
-                        statement.close();
-                    }
-                }
-
-            }
-        } catch (SQLException var31) {
-            System.out.println("  QUERY failed");
-            var31.printStackTrace();
-            this.assertQueryTimeout(var31.getMessage());
-            Assertions.fail("Не удалось выполнить SQL запрос!");
-            var6 = null;
-        } finally {
-            this.closeConnection(connection);
-        }
-
-
-        return null;
-    }
-
-    public ArrayList<Map<String, String>> select(String sqlQuery) {
-        return this.select(this.tunnelUser, this.tunnelPassword, sqlQuery);
-    }
-
-    public ArrayList<Map<String, String>> select(String userAlias, String sqlQuery) {
-        String[] user = this.getUserByAlias(userAlias);
-        Assertions.assertNotNull(user, "Пользователь с псевдонимом '" + userAlias + "' не найден!");
-        return this.select(user[1], user[2], sqlQuery);
-    }
-
-    public void setUsers(String[][] users) {
-        if (users != null && users.length >= 1) {
-            this.users = users;
-        } else {
-            System.out.println("List of users is not specified");
-            Assertions.fail("Список пользователей базы данных не задан!");
-        }
-
-    }
-
-    private String[] getUserByAlias(String userAlias) {
-        if (userAlias != null && !userAlias.trim().isEmpty()) {
-            this.setUsers(this.users);
-            String[][] var2 = this.users;
-            int var3 = var2.length;
-            for(int var4 = 0; var4 < var3; ++var4) {
-                String[] user = var2[var4];
-                if (user[0].equalsIgnoreCase(userAlias)) {
-                    return user;
-                }
+            }while(err.available()>0);
+            if(channel.isClosed()){
+                System.out.println("exit-status: "+channel.getExitStatus());
             }
 
-            Assertions.fail("Пользователь с псевдонимом '" + userAlias + "' не найден в списке пользователей базы данных!");
-            return null;
-        } else {
-            System.out.println("User Alias is not specified");
-            Assertions.fail("Псевдоним пользователя базы данных не задан!");
-            return null;
-        }
-    }
-    public void update(String user, String password, String sqlUpdate) {
-        Connection connection = this.getConnection(user, password);
-        Assertions.assertNotNull(connection, "Не удалось установить соединение с базой данных!");
-        System.out.println("SQL UPDATE:\n  " + sqlUpdate.replaceAll("\\n", "\n  "));
-        System.out.println("Execute SQL UPDATE");
-
-        try {
-            Statement statement = connection.createStatement();
-            Throwable var6 = null;
-
-            try {
-                statement.setQueryTimeout(this.sqlQueryTimeout);
-                statement.executeUpdate(sqlUpdate);
-                System.out.println("  Success");
-            } catch (Throwable var24) {
-                var6 = var24;
-                throw var24;
-            } finally {
-                if (statement != null) {
-                    if (var6 != null) {
-                        try {
-                            statement.close();
-                        } catch (Throwable var23) {
-                            var6.addSuppressed(var23);
-                        }
-                    } else {
-                        statement.close();
-                    }
+            res.addAll(Arrays.stream(resStr.toString().split("\n")).collect(Collectors.toList()));
+            res.remove(0);
+            String line;
+            if(res.size()==0) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                while ((line = reader.readLine()) != null) {
+                    res.add(line);
                 }
-
             }
-        } catch (SQLException var26) {
-            System.out.println("  UPDATE failed");
-            var26.printStackTrace();
-            this.assertQueryTimeout(var26.getMessage());
-            Assertions.fail("Не удалось выполнить SQL UPDATE!");
-        } finally {
-            this.closeConnection(connection);
-        }
+            channel.disconnect();
+            session.disconnect();
 
+        } catch (JSchException | IOException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
     public void update(String sqlUpdate) {
-        this.update(this.tunnelUser, this.tunnelPassword, sqlUpdate);
+        executeQuerry(sqlUpdate);
     }
 
-    public void update(String userAlias, String sqlUpdate) {
-        String[] user = this.getUserByAlias(userAlias);
-        Assertions.assertNotNull(user, "Пользователь с псевдонимом '" + userAlias + "' не найден!");
-        this.update(user[1], user[2], sqlUpdate);
-    }
+    public ArrayList<Map<String, String>> select(String query) {
+        ArrayList<String> resQuerry = executeQuerry(query);
 
-    private void assertQueryTimeout(String exceptionMessage) {
-        if (exceptionMessage != null && exceptionMessage.replace("\n", "").equals("ORA-01013: user requested cancel of current operation")) {
-            throw new Database.SQLTimeoutError("Превышено максимальное время ожидания выполнения SQL запроса!");
+        ArrayList<Map<String, String>> res = new ArrayList<>();
+
+        Assertions.assertFalse(resQuerry.get(0).startsWith("ERROR"), "Запрос вернул ошибку: \n"+ String.join("\n", resQuerry)+"\n");
+        Assertions.assertNotEquals("(0 rows)",resQuerry.get(resQuerry.size()-2),"Запрос вернул 0 строк");
+
+        List<String> headers=new ArrayList<>();
+        String firstStr=resQuerry.get(0).replaceAll(" ", "");
+        while(firstStr.contains("|")){
+            int ind=firstStr.indexOf("|")+1;
+            StringBuilder substr= new StringBuilder();
+            while(ind<firstStr.length() && !Arrays.asList(' ', '|').contains(firstStr.charAt(ind))) {
+                substr.append(firstStr.charAt(ind));
+                ind++;
+            }
+            String deleted= new StringBuilder().append("|").append(substr).toString();
+            firstStr= firstStr.replace(deleted, "");
+            headers.add(substr.toString());
         }
+        headers.add(0,firstStr);
+        for(int i=2;i<resQuerry.size()-2;i++){
+            String str=resQuerry.get(i);
+            Map<String,String> map= new HashMap<>();
+            for(int j=1;str.contains("|");j++){
+                int ind=str.indexOf("|")+1;
+                StringBuilder substr= new StringBuilder();
+                while(ind<str.length() && str.charAt(ind)!='|') {
+                    substr.append(str.charAt(ind));
+                    ind++;
+                }
+                String deleted= new StringBuilder().append("|").append(substr).toString();
+                str= str.replaceFirst(Pattern.quote(deleted), "");
+                if (substr.toString().trim().length()>0)
+                    map.put(headers.get(j),substr.toString().trim());
+                else
+                    map.put(headers.get(j),null);
+            }
+            if (str.trim().length()>0)
+                map.put(headers.get(0),str.trim());
+            else
+                map.put(headers.get(0),null);
+            res.add(map);
+        }
+
+        LOG.info("Запрос выполнен успешно");
+        return res;
     }
 
     public class SQLTimeoutError extends Error {

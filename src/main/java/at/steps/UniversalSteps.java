@@ -9,6 +9,7 @@ import at.model.enums.Category;
 import at.model.enums.SubCategory;
 import at.parser.Context;
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
 import io.qameta.allure.Step;
 import pages.IntranetLoginPage;
 import pages.IntranetMainPage;
@@ -22,12 +23,12 @@ public class UniversalSteps {
         Environment environment= HookHelper.getEnvironment();
         for(User user: environment.getUsers()){
             if(user.getRole().equals(role)){
-                Context.saveObject("Текущий пользователь",user);
+                Context.saveObject("Пользователь",user);
                 break;
             }
         }
         open(environment.getMainUrl());
-        new IntranetLoginPage().login((User)Context.getSavedObject("Текущий пользователь"),
+        new IntranetLoginPage().login((User)Context.getSavedObject("Пользователь"),
                 environment.getMainUrl());
        }
     @Step("Перейти в категорию {0} во вкладку {1}")
@@ -50,10 +51,12 @@ public class UniversalSteps {
                 IntranetMainPage intranetMainPage=new IntranetMainPage();
                 intranetMainPage.search(name);
                 intranetMainPage.loginOnBehalfFirst();
+                User userOnBehalf=new User();
+                userOnBehalf.setName(name);
+                Context.saveObject("Текущий пользователь",userOnBehalf);
                 break;
             default:
                 throw new StepNotImplementedException("Зайти в систему "+system+ " от имени "+name+"не реализован для системы "+system,UniversalSteps.class);
-
         }
     }
 

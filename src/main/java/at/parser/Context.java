@@ -91,7 +91,10 @@ public class Context {
      */
     public static void clearLocalStorage() {
         savedLocalVariables.get().clear();
+        LOG.info("savedLocalVariables очищены");
         savedObjects.get().clear();
+        LOG.info("savedObjects очищены");
+
     }
 
     /**
@@ -101,6 +104,8 @@ public class Context {
      */
     public static void saveLocalVariable(String key, String value) {
         savedLocalVariables.get().put(key.toLowerCase(), value);
+        LOG.info("savedLocalVariables сохранены");
+
     }
 
     /**

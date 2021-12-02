@@ -3,6 +3,7 @@ package at.steps;
 import at.database.requests.RequestsDAO;
 import at.exceptions.StepNotImplementedException;
 import at.model.Product;
+import at.model.User;
 import at.model.enums.Category;
 import at.parser.Context;
 import io.qameta.allure.Step;
@@ -10,6 +11,10 @@ import org.junit.jupiter.api.Assertions;
 import pages.requests.MainRequestsPage;
 import pages.requests.OutLearningPage;
 import pages.requests.TransferBetweenBlocksPage;
+
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 
 public class RequestSteps {
 
@@ -49,10 +54,11 @@ public class RequestSteps {
                                           String courseName,
                                           String typeLearning,
                                           String mail,
-                                          String beginDate,
-                                          String finishDate,
+                                          LocalDate beginDate,
+                                          LocalDate finishDate,
                                           String url,
                                           int price){
+
         OutLearningPage outLearningPage=new OutLearningPage();
         outLearningPage.setCollege(collegeName);
         outLearningPage.setCourse(courseName);
@@ -65,15 +71,20 @@ public class RequestSteps {
 
     @Step("Сохранить все данные новой заявки")
     private static void getAllRequestData() {
-        new MainRequestsPage().getNeededRequest();
+        Product product=(Product) Context.getSavedObject("Продукт");
+        List<String> res=new MainRequestsPage().getNeededRequest();
+        product.setNumber(res.get(0));
+        product.setCandidateName(res.get(1));
+        product.setDate(res.get(2));
     }
 
-    @Step("Проверить что статус заявки {0}")
+    @Step("Проверить что статус заявки \"{0}\"")
     public static void checkStatus(String expectedStatus) {
         Product product=(Product) Context.getSavedObject("Продукт");
-        String reqStatus=new RequestsDAO().getRequestStatus(product.getNumber());
+        String reqStatus=new RequestsDAO().getRequestStatus(product.getNumber(),product.getCategory(),product.getSubCategory());
         Assertions.assertEquals(expectedStatus,reqStatus);
         product.setStatus(reqStatus);
+
     }
 
     @Step("Отменяет заявку")
@@ -82,6 +93,7 @@ public class RequestSteps {
         MainRequestsPage mainRequestsPage=new MainRequestsPage();
         mainRequestsPage.chooseRequest(product.getNumber(), product.getSubCategory());
         mainRequestsPage.cancelRequest(product.getSubCategory(),assistantType,product.getNumber());
+
     }
     @Step("Начинает новую заявку")
     public static void beginNewRequest() {

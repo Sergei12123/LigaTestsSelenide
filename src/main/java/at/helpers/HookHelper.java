@@ -153,37 +153,10 @@ public class HookHelper {
     /**
      * Сделать скриншот для отчета
      *
-     * @param dismissAlert алерт закрыть/не закрывать
      */
-    public static void makeScreenshot(boolean dismissAlert) {
-        boolean browserState = HookHelper.canMakeScreenshot(dismissAlert);
-        if (browserState) {
-            AllureHelper.addAttachmentsToCase();
-        }
-    }
-
-    /**
-     * Возможность сделать скриншот
-     *
-     * @param dismissAlert закрытие алерта
-     * @return boolean - возможно/невозможно сделать скриншот
-     */
-    public static boolean canMakeScreenshot(boolean dismissAlert) {
-        try {
-            getWebDriver().getCurrentUrl();
-            return true;
-        } catch (UnhandledAlertException unhandledAlertException) {
-            AllureReport.report("Отображается алерт: ".concat(unhandledAlertException.getAlertText()));
-            if (dismissAlert) {
-                getWebDriver().switchTo().alert().dismiss();
-                AllureReport.report("Закрытие алерта");
-                return true;
-            }
-            return false;
-        } catch (WebDriverException t) {
-            AllureReport.report("Состояние браузера повис или закрыт по тайм-ауту");
-            return false;
-        }
+    @Step("Делаем скриншот")
+    public static void makeScreenshot() {
+        AllureHelper.addAttachmentsToCase();
     }
 
     /**

@@ -18,7 +18,7 @@ public class OutLearningPage {
     public void setCollege(String college){
         Configuration.timeout=30000;
         $(byAttribute("name","edu_facility")).setValue(college);
-        Configuration.timeout=4000;
+        Configuration.timeout=10000;
     }
 
     @Step("Указать курс")
@@ -33,30 +33,27 @@ public class OutLearningPage {
 
     @Step("Указать почту")
     public void setMail(String mail){
-        $(byAttribute("name","email-994112")).setValue(mail);
+        $(byXpath("//*[contains(text(), 'Почта')]/../../../*//input")).setValue(mail);
     }
 
     @Step("Указать даты обучения")
-    public void setDate(String beginDate, String endDate) {
-        DateTimeFormatter oldDateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        DateTimeFormatter newDateFormat = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy г.");
-        LocalDate d1= LocalDate.parse(beginDate,oldDateFormat);
-        LocalDate d2= LocalDate.parse(endDate,oldDateFormat);
-        Assertions.assertTrue(d2.isAfter(d1) && d1.isAfter(LocalDate.now()));
+    public void setDate(LocalDate beginDate, LocalDate endDate) {
+        DateTimeFormatter newDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy г.");
+        Assertions.assertTrue(endDate.isAfter(beginDate) && beginDate.isAfter(LocalDate.now()),"Дата начала обучения позже даты конца обучения");
         SelenideElement selenideElement1=$$(byAttribute("placeholder","Выберите даты")).first();
         selenideElement1.click();
-        SelenideElement dateElement1=$(byAttribute("aria-label",newDateFormat.format(d1)));
+        SelenideElement dateElement1=$(byAttribute("aria-label",newDateFormat.format(beginDate)));
         while(!dateElement1.isDisplayed()) {
             $(byCssSelector(".vc-arrow.is-right")).click();
         }
-        $(byAttribute("aria-label",newDateFormat.format(d1))).click();
+        $(byAttribute("aria-label",newDateFormat.format(beginDate))).click();
         SelenideElement selenideElement2=$$(byAttribute("placeholder","Выберите даты")).last();
         selenideElement2.click();
-        SelenideElement dateElement2=$(byAttribute("aria-label",newDateFormat.format(d2)));
+        SelenideElement dateElement2=$(byAttribute("aria-label",newDateFormat.format(endDate)));
         while(!dateElement2.isDisplayed()) {
             $(byCssSelector(".vc-arrow.is-right")).click();
         }
-        $(byAttribute("aria-label",newDateFormat.format(d2))).click();
+        $(byAttribute("aria-label",newDateFormat.format(endDate))).click();
 
     }
 

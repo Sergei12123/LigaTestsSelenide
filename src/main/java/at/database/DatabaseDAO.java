@@ -36,7 +36,7 @@ public abstract class DatabaseDAO {
      */
     protected String getColumn(String table, String rowId, String column) {
         String query = "SELECT " + column + " \n" +
-                "FROM siebel." + table + " \n" +
+                "FROM " + table + " \n" +
                 "WHERE row_id = '" + rowId + "'";
         stepAllureQueryText(query);
         ArrayList<Map<String, String>> result = this.database.select(query);
@@ -59,7 +59,7 @@ public abstract class DatabaseDAO {
      */
     protected Map<String, String> getRow(String table, String rowId) {
         String query = "SELECT * \n" +
-                "FROM siebel." + table + " \n" +
+                "FROM " + table + " \n" +
                 "WHERE row_id = '" + rowId + "'";
         stepAllureQueryText(query);
         ArrayList<Map<String, String>> result = this.database.select(query);
@@ -82,7 +82,7 @@ public abstract class DatabaseDAO {
      * @param value  устанавливаемое значение
      */
     protected void setColumn(String table, String id, String column, String value) {
-        String query = "update siebel." + table + "\n" +
+        String query = "update " + table + "\n" +
                 "set " + column + " = '" + value + "' \n" +
                 "where row_id = '" + id + "'";
         stepAllureQueryText(query);

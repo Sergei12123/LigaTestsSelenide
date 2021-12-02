@@ -4,6 +4,7 @@ import at.helpers.HookHelper;
 import at.helpers.MyTestWatcher;
 import at.parser.Context;
 import at.utils.allure.AllureHelper;
+import com.codeborne.selenide.Configuration;
 import io.qameta.allure.Step;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.AfterEach;
@@ -19,17 +20,15 @@ import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
  * Класс содержит действия для каждого сценария или шага
  */
 @Log4j2
-public class Hook implements BeforeEachCallback, AfterEachCallback {
+public class Hook implements BeforeEachCallback {
     private static boolean started = false;
 
     /**
      * Подключение к базе данных
      */
-    @BeforeEach
-    @Step("Инициализация БД 694")
-    public void initializeTest694DB() {
+    @Step("Инициализация БД")
+    public void initializeTestDB() {
         HookHelper.getDatabase("crc_694_ontest_26fcfb5c");
-        initializeWD();
     }
 
     /**
@@ -37,6 +36,7 @@ public class Hook implements BeforeEachCallback, AfterEachCallback {
      */
     @Step("Инициализация браузера")
     public void initializeWD() {
+        Configuration.timeout=10000;
         HookHelper.clearWebDriver();
         HookHelper.initWebDriver();
     }
@@ -66,7 +66,6 @@ public class Hook implements BeforeEachCallback, AfterEachCallback {
     /**
      * Закрыть браузер и закрыть подключение к БД
      */
-    @AfterEach
     @Step("Закрытие браузера и подключений к БД")
     public void clear() {
         AllureHelper.execIgnoreException("Закрытие браузера", () ->
@@ -80,18 +79,20 @@ public class Hook implements BeforeEachCallback, AfterEachCallback {
             HookHelper.clearWebDriver();
             return null;
         });
+
+    }
+
+    @Step("After Test")
+    public void afterEach() throws Exception {
+        clear();
         clearContext();
         addInformation();
     }
 
     @Override
-    public void afterEach(ExtensionContext extensionContext) throws Exception {
-        clear();
-
-    }
-
-    @Override
+    @Step("Before Test")
     public void beforeEach(ExtensionContext extensionContext) throws Exception {
-        initializeTest694DB();
+        initializeTestDB();
+        initializeWD();
     }
 }

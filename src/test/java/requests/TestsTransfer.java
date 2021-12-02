@@ -13,21 +13,21 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 
+
 @Epic("Заявки")
+@Story("Заявки на перевод")
 @ExtendWith({MyTestWatcher.class,Hook.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class Tests {
+public class TestsTransfer {
 
     @Feature("Заявка на перевод между блоками, доведение до статуса “Заявка отменена”")
     @Description("Создание, прикрепление скана, отправка на доработку, доведение до статуса “Заявка отменена” от Ассистента ОС")
     @DisplayName("Заявка на перевод между блоками")
-    @Order(1)
+    @Order(2)
     @Ready
     @Test
     public void testTransferBetweenBlocks(){
         PreconditionsSteps.existsProduct(Category.REQUEST,SubCategory.TRANSFER_BETWEEN_BLOCKS);
-        RequestSteps.checkStatus("Новая заявка");
-
         UniversalSteps.userLoginWithRole("Администратор","Intranet");
         UniversalSteps.loginOnBehalf("Intranet","Вербицкая Анна");
         UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST, SubCategory.TRANSFER_BETWEEN_BLOCKS);
@@ -45,33 +45,14 @@ public class Tests {
         UniversalSteps.loginOnBehalf("Intranet","Фомина Александра");
         UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST, SubCategory.TRANSFER_BETWEEN_BLOCKS);
         RequestSteps.cancelRequest("Ассистент ПС");
+        RequestSteps.checkStatus("На доработке у Ассистента отдающей стороны");
         UniversalSteps.userLoginWithRole("Администратор","Intranet");
         UniversalSteps.loginOnBehalf("Intranet","Вербицкая Анна");
         UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST, SubCategory.TRANSFER_BETWEEN_BLOCKS);
         RequestSteps.cancelRequest("Ассистент ОС");
-        RequestSteps.checkRequestCanceled();
+        RequestSteps.checkStatus("Заявка отменена");
     }
 
-    @Feature("Заявка на внешнее обучение feature")
-    @Description("Создание, менеджер отклонил, статус “Заявка отклонена”")
-    @DisplayName("Заявка на внешнее обучение DisplayName")
-    @Story("Заявка на внешнее обучение Story")
-    @Order(2)
-    @Ready
-    @Test
-    public void testOutLearning(){
-        UniversalSteps.userLoginWithRole("Администратор","Intranet");
-        UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST,SubCategory.OUT_LEARNING);
-        RequestSteps.beginNewRequest();
-        RequestSteps.setOutLearningData(
-                "МГУ",
-                "Java",
-                "Дистанционный",
-                "abcd@gmail.com",
-                "22.11.2021",
-                "21.12.2022",
-                "https://www.mirea.ru",
-                10000);
-        RequestSteps.createRequest();
-    }
+
+
 }

@@ -10,6 +10,9 @@ import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.*;
 
@@ -28,7 +31,7 @@ public class MainRequestsPage {
                 $(".services-add-button").shouldBe(Condition.exist).click();
                 $(byText("Создать")).click();
         }
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
     }
 
     @Step("Выбрать тип необходимой заявки")
@@ -44,29 +47,31 @@ public class MainRequestsPage {
             default:
                 throw new StepNotImplementedException("Нельзя выбрать заявку с типом "+subCategory.getSubType(), this.getClass());
         }
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
 
     }
 
     @Step ("Получить основные данные по созданной заявке")
-    public void getNeededRequest(){
+    public List<String> getNeededRequest(){
         Configuration.timeout = 30000;
         Product product=(Product)Context.getSavedObject("Продукт");
+        List<String> res=new ArrayList<>();
         switch (product.getSubCategory()){
             case TRANSFER_BETWEEN_BLOCKS:
                 $(".transfer-item__id").shouldBe(Condition.exist);
-                product.setNumber($$(".transfer-item__id").first().getText());
-                product.setCandidateName($$(".transfer-item__name").first().getText());
-                product.setDate($$(".transfer-item__date").first().getText());
+                res.add($$(".transfer-item__id").first().getText());
+                res.add($$(".transfer-item__name").first().getText());
+                res.add($$(".transfer-item__date").first().getText());
                 break;
             case OUT_LEARNING:
                 $(byXpath("//*[@class=\"services__item-left-wrapper\"]")).shouldBe(Condition.exist);
-                product.setNumber($$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).first().getText());
-                product.setCandidateName($$(".services__item-name").first().getText());
-                product.setDate($$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).first().getText());
+                res.add($$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).first().getText().replaceAll("[^0-9]", ""));
+                res.add($$(".services__item-name").first().getText());
+                res.add($$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).first().getText());
                 break;
         }
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
+        return res;
     }
 
     @Step ("Выбрать созданную заявку")
@@ -79,20 +84,29 @@ public class MainRequestsPage {
                 break;
             case OUT_LEARNING:
                 $(byXpath("//*[@class=\"services__item-left-wrapper\"]")).shouldBe(Condition.exist);
-                $$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).find(Condition.exactText(number)).click();
+                $$(byXpath("//*[@class=\"services__item-left-wrapper\"]//*")).find(Condition.text(number)).click();
                 break;
         }
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
     }
 
     @Step ("Отменить заявку")
     public void cancelRequest(SubCategory subCategory,String assistantType,String requestNumber) {
         switch (subCategory){
+            case OUT_LEARNING:
             case TRANSFER_BETWEEN_BLOCKS:
-                if(assistantType.equals("Ассистент ПС"))
-                    $(byXpath("//*[text()=\""+requestNumber+"\"]/../../..//*[contains(text(), 'Отмена')]")).click();
-                else
-                    $(byXpath("//*[text()=\""+requestNumber+"\"]/../../..//*[contains(text(), 'Отменить')]")).click();
+                switch (assistantType) {
+                    case "Ассистент ПС":
+                        $(byXpath("//*[text()=\"" + requestNumber + "\"]/../../..//*[contains(text(), 'Отмена')]")).click();
+                        break;
+                    case "Ассистент ОС":
+                        $(byXpath("//*[text()=\"" + requestNumber + "\"]/../../..//*[contains(text(), 'Отменить')]")).click();
+                        break;
+                    case "Менеджер":
+                        $(byXpath("//*[contains(text(), \"" + requestNumber + "\")]/../../../../*//*[contains(text(), 'Отклонить')]")).shouldBe(Condition.enabled).click();
+                        $(byXpath("//*[contains(text(), \"" + requestNumber + "\")]/../../../../*//*[@class=\"services__item-status\"]")).shouldBe(Condition.text("Заявка отклонена"));
+                        break;
+                }
                 break;
             default:
                 throw new StepNotImplementedException("Шаг отменить заявку не реализован для подкатегории"+subCategory.getSubType(),this.getClass());
@@ -111,7 +125,7 @@ public class MainRequestsPage {
             default:
                 throw new StepNotImplementedException("Шаг \"Проверить что заявка была отменена\" не реализован для подкатегории"+subCategory.getSubType(),this.getClass());
         }
-        Configuration.timeout = 4000;
+        Configuration.timeout = 10000;
 
     }//todo Глянуть после БД
 }

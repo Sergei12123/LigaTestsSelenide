@@ -29,11 +29,9 @@ public class IntranetMainPage {
 
     @Step("Выбрать в поисковой выдаче первого кандидата и нажать \"войти от имени\"")
     public void loginOnBehalfFirst(){
-        Configuration.timeout=10000;
         $(byText("Войти от имени")).shouldBe(Condition.exist);
         $$(byText("Войти от имени")).first().click();
         $(byText("Войти от имени")).should(Condition.not(Condition.exist));
-        Configuration.timeout=4000;
         refresh();
     }
 }
