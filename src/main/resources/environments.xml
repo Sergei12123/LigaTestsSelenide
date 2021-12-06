@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environments>
     <environment name="test-intranet">
-        <ligaEndpoints>
-            <ligaEndpoint alias="intranetEndpoint">https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/auth?redirect=%2F</ligaEndpoint>
-        </ligaEndpoints>
+        <endpoints>
+            <endpoint alias="Intranet">https://crc-694-ontest-26fcfb5c.test-intranet.digitalleague.ru/auth?redirect=%2F</endpoint>
+        </endpoints>
         <databases>
             <database alias="crc_694_ontest_26fcfb5c">
                 <serviceName>Intranet</serviceName>

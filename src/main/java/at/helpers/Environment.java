@@ -12,16 +12,14 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Getter
 public class Environment {
     private String name;
     private Document document;
-    private String mainUrl;
+    private Map<String,String> urls;
     private String[][] apps;
     public Map<String, Map<String, String>> databases = new HashMap();
     private User[] users;
@@ -46,7 +44,7 @@ public class Environment {
     }
     private void setAllData() {
         this.setEnvironment("test-intranet");
-        this.setLigaEndpoints();
+        this.setEndpoints();
         this.setDatabaseProperties();
         this.setUsers();
     }
@@ -123,11 +121,16 @@ public class Environment {
         return ((Element)node).getAttribute(attribute);
     }
 
-    private void setLigaEndpoints() {
-        NodeList nodeList = this.environment.getElementsByTagName("ligaEndpoints");
+    private void setEndpoints() {
+        NodeList nodeList = this.environment.getElementsByTagName("endpoints");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            NodeList urls = ((Element)nodeList.item(0)).getElementsByTagName("ligaEndpoint");
-            this.mainUrl=urls.item(0).getTextContent();
+            NodeList urls = ((Element)nodeList.item(0)).getElementsByTagName("endpoint");
+            this.urls=new HashMap<>();
+            for(int i = 0; i < urls.getLength(); ++i) {
+                Node url = urls.item(i);
+                this.urls.put(this.getTagAttribute(url, "alias"),
+                        this.getTagValue(url));
+            }
         } else {
             System.out.println("Tag 'ligaEndpoints' is undefined");
             Assertions.fail("Список ligaEndpoints не определен!");
@@ -149,8 +152,8 @@ public class Environment {
         return node.getFirstChild() != null ? node.getFirstChild().getNodeValue() : null;
     }
 
-    public Environment(String mainUrl, String[][] apps,User[] users){
-        this.mainUrl =mainUrl;
+    public Environment(Map<String, String> mainUrl, String[][] apps,User[] users){
+        this.urls =mainUrl;
         this.apps =apps;
         this.users =users;
     }
@@ -177,12 +180,4 @@ public class Environment {
         }
     }
 
-    public String getAppUrl(String application) {
-        for (String[] app : apps) {
-            if (app[0].equals(application)) {
-                return app[1];
-            }
-        }
-        return "";
-    }
 }

@@ -27,9 +27,9 @@ public class UniversalSteps {
                 break;
             }
         }
-        open(environment.getMainUrl());
+        open(environment.getUrls().get(app));
         new IntranetLoginPage().login((User)Context.getSavedObject("Пользователь"),
-                environment.getMainUrl());
+                environment.getUrls().get(app));
        }
     @Step("Перейти в категорию {0} во вкладку {1}")
     public static void goToPageByCategoryAndSubCategory(Category category, SubCategory subCategory){
