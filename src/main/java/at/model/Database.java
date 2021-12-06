@@ -1,25 +1,16 @@
 package at.model;
 
 
-import at.parser.Context;
 import com.jcraft.jsch.*;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
-
 import java.io.*;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.sql.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.google.common.io.CharStreams.copy;
-import static java.lang.System.in;
-import static java.lang.Thread.sleep;
 
 @Getter
 public class Database {
@@ -34,7 +25,7 @@ public class Database {
     private final String databaseLogin;
     private final String databasePass;
     private int assinged_port;
-    private Logger LOG = LogManager.getLogger(Database.class);
+    private final Logger LOG = LogManager.getLogger(Database.class);
 
 
     public Database(String alias, String serviceName, String protocol, String host, String user, String userPass, String port, String databaseName, String databasePass) {
@@ -79,24 +70,6 @@ public class Database {
             out.write((databasePass+"\n").getBytes());
             out.flush();
             InputStream err=((ChannelExec) channel).getErrStream();
-            BufferedReader readerErr=new BufferedReader(new InputStreamReader(err));
-//            res.add(readerErr.readLine());
-//            String line;
-
-//            while((line = readerErr.readLine()) != null){
-//                if (line.isEmpty()) {
-//                    break;
-//                }
-//                res.add(line);
-//            }
-//
-//            res.remove(0);
-//            if(res.size()==0) {
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-//                while ((line = reader.readLine()) != null) {
-//                    res.add(line);
-//                }
-//            }
 
             StringBuilder resStr= new StringBuilder();
             byte[] tmp=new byte[1024];
@@ -126,7 +99,6 @@ public class Database {
             }
             channel.disconnect();
             session.disconnect();
-
         } catch (JSchException | IOException e) {
             e.printStackTrace();
         }

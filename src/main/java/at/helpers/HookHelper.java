@@ -3,15 +3,21 @@ package at.helpers;
 import at.model.Database;
 import at.utils.allure.AllureHelper;
 import at.utils.allure.AllureReport;
+import com.codeborne.selenide.Browser;
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import io.qameta.allure.Step;
 import lombok.extern.log4j.Log4j2;
 
 import managers.DatabaseManager;
 import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.remote.UnreachableBrowserException;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.*;
 import at.parser.Context;
 
 import java.io.File;
@@ -19,8 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.codeborne.selenide.WebDriverRunner.closeWindow;
-import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
+import static com.codeborne.selenide.WebDriverRunner.*;
 
 /**
  * Класс описывает действия из класса Hook
@@ -87,7 +92,35 @@ public class HookHelper {
     @Step("Инициализация браузера")
     public static void initWebDriver() {
         System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
-        System.setProperty("selenide.browser", "Chrome");
+        RemoteWebDriver driver = new ChromeDriver(loadBrowserCapabilities());
+
+        driver.manage().window().maximize();
+        setWebDriver(driver);
+    }
+
+    /**
+     * Установить свойства браузера
+     * @return DesiredCapabilities - свойства браузера
+     */
+    @Step("Установка свойств браузера")
+    public static DesiredCapabilities loadBrowserCapabilities() {
+        DesiredCapabilities capabilities = new DesiredCapabilities(BrowserType.CHROME, "", Platform.ANY);
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addExtensions(new File("src/main/resources/extensions/ModifyHeaders_2.2.4_0.crx"));
+        chromeOptions.setExperimentalOption("useAutomationExtension", false);
+        chromeOptions.addArguments("--window-size=1280,1024", "--ignore-certificate-errors");
+        Map<String, Object> prefs = new HashMap();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        chromeOptions.setExperimentalOption("prefs", prefs);
+        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+        capabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR,
+                UnexpectedAlertBehaviour.IGNORE);
+        capabilities.setCapability("enableVNC", true);
+        capabilities.setCapability("screenResolution", "1920x1080x24");
+        capabilities.setCapability("env", new String[]{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"});
+        return capabilities;
     }
 
     /**

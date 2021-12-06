@@ -48,7 +48,7 @@ public class AllureHelper {
     }
 
     /**
-     * Добавление скриншота и исходный код страницы в отчет
+     * Добавление скриншота и исходный код страницы в отчет после упавшего теста
      *
      */
     public static void addAttachmentsToCase() {
@@ -60,6 +60,10 @@ public class AllureHelper {
             Allure.addAttachment("[PAGESOURCE]", "text", pageSource, "html");
     }
 
+    @Attachment(value = "Screenshot", type = "image/png")
+    public static byte[] screenshot() {
+        return ((TakesScreenshot) getWebDriver()).getScreenshotAs(OutputType.BYTES);
+    }
     /**
      * Добавление информационного текста в отчет
      *
