@@ -8,8 +8,7 @@ public enum SubCategory {
     @Getter
     private final String subType;
 
-    <T extends String> SubCategory(T subType)
-    {
+    <T extends String> SubCategory(T subType) {
         this.subType = subType;
     }
 }

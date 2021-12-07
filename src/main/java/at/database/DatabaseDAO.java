@@ -21,8 +21,7 @@ public abstract class DatabaseDAO {
 
     }
 
-    public Database getDatabase()
-    {
+    public Database getDatabase() {
         return database;
     }
 

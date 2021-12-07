@@ -7,8 +7,7 @@ public enum Category {
     @Getter
     private final String type;
 
-    <T extends String> Category(T type)
-    {
+    <T extends String> Category(T type) {
         this.type = type;
     }
 }

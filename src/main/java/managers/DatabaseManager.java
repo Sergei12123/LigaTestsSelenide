@@ -20,19 +20,24 @@ public abstract class DatabaseManager {
 
     public static void setDatabase(Database database) {
         LOG.info("Сохраняем данные БД");
-        switch (database.getAlias()){
-            case "crc_694_ontest_26fcfb5c" : { databaseThreadLocal.set(database); break; }
-            default : { databaseThreadLocal.remove(); }
+        switch (database.getAlias()) {
+            case "crc_694_ontest_26fcfb5c": {
+                databaseThreadLocal.set(database);
+                break;
+            }
+            default: {
+                databaseThreadLocal.remove();
+            }
         }
     }
 
-    public static void connect(){
+    public static void connect() {
 
     }
 
-    public static Database getDatabase(){
+    public static Database getDatabase() {
         LOG.info("Получаем данные о БД");
-        return databaseThreadLocal.get() == null?null:databaseThreadLocal.get();
+        return databaseThreadLocal.get() == null ? null : databaseThreadLocal.get();
     }
 
 }

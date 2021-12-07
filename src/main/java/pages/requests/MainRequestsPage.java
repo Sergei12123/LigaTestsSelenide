@@ -17,10 +17,10 @@ import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.*;
 
 public class MainRequestsPage {
-    @Step ("Начать новую заявку с типом {0}")
-    public void beginNewRequest(SubCategory subCategory){
+    @Step("Начать новую заявку с типом {0}")
+    public void beginNewRequest(SubCategory subCategory) {
         Configuration.timeout = 40000;
-        switch (subCategory){
+        switch (subCategory) {
             case TRANSFER_BETWEEN_BLOCKS:
                 $$(byXpath("//*[@class=\"services__filter\"]//*")).find(Condition.text("Заявки на перевод")).click();
                 $(".services-add-button").shouldBe(Condition.exist).click();
@@ -35,9 +35,9 @@ public class MainRequestsPage {
     }
 
     @Step("Выбрать тип необходимой заявки")
-    public void chooseNededRequest(SubCategory subCategory){
+    public void chooseNededRequest(SubCategory subCategory) {
         Configuration.timeout = 40000;
-        switch (subCategory){
+        switch (subCategory) {
             case TRANSFER_BETWEEN_BLOCKS:
                 $$(byXpath("//*[@class=\"services__filter\"]//*")).find(Condition.text("Заявки на перевод")).click();
                 break;
@@ -45,18 +45,18 @@ public class MainRequestsPage {
                 $$(byXpath("//*[@class=\"services__filter\"]//*")).find(Condition.text("Заявки на внешнее обучение")).click();
                 break;
             default:
-                throw new StepNotImplementedException("Нельзя выбрать заявку с типом "+subCategory.getSubType(), this.getClass());
+                throw new StepNotImplementedException("Нельзя выбрать заявку с типом " + subCategory.getSubType(), this.getClass());
         }
         Configuration.timeout = 10000;
 
     }
 
-    @Step ("Получить основные данные по созданной заявке")
-    public List<String> getNeededRequest(){
+    @Step("Получить основные данные по созданной заявке")
+    public List<String> getNeededRequest() {
         Configuration.timeout = 30000;
-        Product product=(Product)Context.getSavedObject("Продукт");
-        List<String> res=new ArrayList<>();
-        switch (product.getSubCategory()){
+        Product product = (Product) Context.getSavedObject("Продукт");
+        List<String> res = new ArrayList<>();
+        switch (product.getSubCategory()) {
             case TRANSFER_BETWEEN_BLOCKS:
                 $(".transfer-item__id").shouldBe(Condition.exist);
                 res.add($$(".transfer-item__id").first().getText());
@@ -74,10 +74,10 @@ public class MainRequestsPage {
         return res;
     }
 
-    @Step ("Выбрать созданную заявку")
-    public void chooseRequest(String number,SubCategory subCategory){
+    @Step("Выбрать созданную заявку")
+    public void chooseRequest(String number, SubCategory subCategory) {
         Configuration.timeout = 40000;
-        switch (subCategory){
+        switch (subCategory) {
             case TRANSFER_BETWEEN_BLOCKS:
                 $(".transfer-item__id").shouldBe(Condition.exist);
                 $$(".transfer-item__id").find(Condition.exactText(number)).click();
@@ -90,9 +90,9 @@ public class MainRequestsPage {
         Configuration.timeout = 10000;
     }
 
-    @Step ("Отменить заявку")
-    public void cancelRequest(SubCategory subCategory,String assistantType,String requestNumber) {
-        switch (subCategory){
+    @Step("Отменить заявку")
+    public void cancelRequest(SubCategory subCategory, String assistantType, String requestNumber) {
+        switch (subCategory) {
             case OUT_LEARNING:
             case TRANSFER_BETWEEN_BLOCKS:
                 switch (assistantType) {
@@ -109,21 +109,21 @@ public class MainRequestsPage {
                 }
                 break;
             default:
-                throw new StepNotImplementedException("Шаг отменить заявку не реализован для подкатегории"+subCategory.getSubType(),this.getClass());
+                throw new StepNotImplementedException("Шаг отменить заявку не реализован для подкатегории" + subCategory.getSubType(), this.getClass());
         }
     }
 
     @Step("Проверить что заявка была отменена")
-    public void checkRequestCanceled(String number,SubCategory subCategory) {
+    public void checkRequestCanceled(String number, SubCategory subCategory) {
         Configuration.timeout = 40000;
         refresh();
-        switch (subCategory){
+        switch (subCategory) {
             case TRANSFER_BETWEEN_BLOCKS:
                 $(".transfer-item__id").shouldBe(Condition.exist);
                 $$(".transfer-item__id").find(Condition.exactText(number)).parent().parent().lastChild().find(byClassName("transfer-item__status")).shouldBe(Condition.exactText("Заявка отменена"));
                 break;
             default:
-                throw new StepNotImplementedException("Шаг \"Проверить что заявка была отменена\" не реализован для подкатегории"+subCategory.getSubType(),this.getClass());
+                throw new StepNotImplementedException("Шаг \"Проверить что заявка была отменена\" не реализован для подкатегории" + subCategory.getSubType(), this.getClass());
         }
         Configuration.timeout = 10000;
 

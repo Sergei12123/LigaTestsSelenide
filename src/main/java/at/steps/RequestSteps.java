@@ -24,8 +24,8 @@ public class RequestSteps {
                                                   String newPractice,
                                                   double newRate,
                                                   String managerName,
-                                                  int newSalary){
-        TransferBetweenBlocksPage transferBetweenBlocksPage= new TransferBetweenBlocksPage();
+                                                  int newSalary) {
+        TransferBetweenBlocksPage transferBetweenBlocksPage = new TransferBetweenBlocksPage();
         transferBetweenBlocksPage.chooseCandidat(candidatName);
         transferBetweenBlocksPage.chooseBlock(newBlock);
         transferBetweenBlocksPage.choosePractic(newPractice);
@@ -37,8 +37,8 @@ public class RequestSteps {
 
     @Step("Создает новую заявку")
     public static void createRequest() {
-        Product product=(Product) Context.getSavedObject("Продукт");
-        switch (product.getSubCategory()){
+        Product product = (Product) Context.getSavedObject("Продукт");
+        switch (product.getSubCategory()) {
             case TRANSFER_BETWEEN_BLOCKS:
                 new TransferBetweenBlocksPage().clickCreateRequest();
                 break;
@@ -57,22 +57,22 @@ public class RequestSteps {
                                           LocalDate beginDate,
                                           LocalDate finishDate,
                                           String url,
-                                          int price){
+                                          int price) {
 
-        OutLearningPage outLearningPage=new OutLearningPage();
+        OutLearningPage outLearningPage = new OutLearningPage();
         outLearningPage.setCollege(collegeName);
         outLearningPage.setCourse(courseName);
         outLearningPage.setType(typeLearning);
         outLearningPage.setMail(mail);
-        outLearningPage.setDate(beginDate,finishDate);
+        outLearningPage.setDate(beginDate, finishDate);
         outLearningPage.setURL(url);
         outLearningPage.setPrice(price);
     }
 
     @Step("Сохранить все данные новой заявки")
     private static void getAllRequestData() {
-        Product product=(Product) Context.getSavedObject("Продукт");
-        List<String> res=new MainRequestsPage().getNeededRequest();
+        Product product = (Product) Context.getSavedObject("Продукт");
+        List<String> res = new MainRequestsPage().getNeededRequest();
         product.setNumber(res.get(0));
         product.setCandidateName(res.get(1));
         product.setDate(res.get(2));
@@ -80,31 +80,32 @@ public class RequestSteps {
 
     @Step("Проверить что статус заявки \"{0}\"")
     public static void checkStatus(String expectedStatus) {
-        Product product=(Product) Context.getSavedObject("Продукт");
-        String reqStatus=new RequestsDAO().getRequestStatus(product.getNumber(),product.getCategory(),product.getSubCategory());
-        Assertions.assertEquals(expectedStatus,reqStatus);
+        Product product = (Product) Context.getSavedObject("Продукт");
+        String reqStatus = new RequestsDAO().getRequestStatus(product.getNumber(), product.getCategory(), product.getSubCategory());
+        Assertions.assertEquals(expectedStatus, reqStatus);
         product.setStatus(reqStatus);
 
     }
 
     @Step("Отменяет заявку")
     public static void cancelRequest(String assistantType) {
-        Product product=(Product) Context.getSavedObject("Продукт");
-        MainRequestsPage mainRequestsPage=new MainRequestsPage();
+        Product product = (Product) Context.getSavedObject("Продукт");
+        MainRequestsPage mainRequestsPage = new MainRequestsPage();
         mainRequestsPage.chooseRequest(product.getNumber(), product.getSubCategory());
-        mainRequestsPage.cancelRequest(product.getSubCategory(),assistantType,product.getNumber());
+        mainRequestsPage.cancelRequest(product.getSubCategory(), assistantType, product.getNumber());
 
     }
+
     @Step("Начинает новую заявку")
     public static void beginNewRequest() {
-        Product product=(Product) Context.getSavedObject("Продукт");
+        Product product = (Product) Context.getSavedObject("Продукт");
         new MainRequestsPage().beginNewRequest(product.getSubCategory());
 
     }
 
     @Step("Проверяет что заявка была отменена")
     public static void checkRequestCanceled() {
-        Product product=(Product) Context.getSavedObject("Продукт");
-        new MainRequestsPage().checkRequestCanceled(product.getNumber(),product.getSubCategory());
+        Product product = (Product) Context.getSavedObject("Продукт");
+        new MainRequestsPage().checkRequestCanceled(product.getNumber(), product.getSubCategory());
     }
 }

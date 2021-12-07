@@ -50,11 +50,10 @@ public class HookHelper {
         }
 
 
-
         long start = System.currentTimeMillis();
         Thread t = new Thread(() -> {
             try {
-                log.debug("Trying to close the browser {}", getWebDriver().getClass().getSimpleName()+ " ...");
+                log.debug("Trying to close the browser {}", getWebDriver().getClass().getSimpleName() + " ...");
                 closeWebDriver();
             } catch (UnreachableBrowserException e) {
 
@@ -75,10 +74,11 @@ public class HookHelper {
 
     /**
      * Инициализация переменных для заданного стенда
+     *
      * @return Environment - свойство в формате xml
      */
     public static Environment getEnvironment() {
-        if (environment == null){
+        if (environment == null) {
             File xml = new File("src/main/resources/environments.xml");
             environment = new Environment(xml);
         }
@@ -87,7 +87,6 @@ public class HookHelper {
 
     /**
      * Запустить браузер
-     *
      */
     @Step("Инициализация браузера")
     public static void initWebDriver() {
@@ -100,6 +99,7 @@ public class HookHelper {
 
     /**
      * Установить свойства браузера
+     *
      * @return DesiredCapabilities - свойства браузера
      */
     @Step("Установка свойств браузера")
@@ -107,7 +107,6 @@ public class HookHelper {
         DesiredCapabilities capabilities = new DesiredCapabilities(BrowserType.CHROME, "", Platform.ANY);
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addExtensions(new File("src/main/resources/extensions/ModifyHeaders_2.2.4_0.crx"));
-        chromeOptions.setExperimentalOption("useAutomationExtension", false);
         chromeOptions.addArguments("--window-size=1280,1024", "--ignore-certificate-errors");
         Map<String, Object> prefs = new HashMap();
         prefs.put("credentials_enable_service", false);
@@ -125,13 +124,14 @@ public class HookHelper {
 
     /**
      * Подключение к базе данных
+     *
      * @param alias свойства среды
      */
     @Step("Инициализация БД")
     public static Database getDatabase(String alias) {
-        if(database==null){
+        if (database == null) {
             Map<String, String> bd = HookHelper.getEnvironment().databases.get(alias);
-            database= new Database(alias,
+            database = new Database(alias,
                     bd.get("serviceName"),
                     bd.get("protocol"),
                     bd.get("host"),
@@ -148,6 +148,7 @@ public class HookHelper {
 
     /**
      * Возвращает работу браузера
+     *
      * @return boolean - работоспособность браузера
      */
     public static boolean isBrowserAlive() {
@@ -185,7 +186,6 @@ public class HookHelper {
 
     /**
      * Сделать скриншот для отчета
-     *
      */
     @Step("Делаем скриншот")
     public static void makeScreenshot() {

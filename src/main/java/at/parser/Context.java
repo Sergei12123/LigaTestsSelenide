@@ -40,11 +40,12 @@ public class Context {
 
     /**
      * Сохраняет объект
-     * @param name наименование объекта
+     *
+     * @param name   наименование объекта
      * @param object объект
      */
     public static void saveObject(String name, Object object) {
-        LOG.info("Происходит сохранение объекта \""+name+"\"");
+        LOG.info("Происходит сохранение объекта \"" + name + "\"");
         savedObjects.get().put(name.toLowerCase(), object);
     }
 
@@ -56,7 +57,7 @@ public class Context {
      */
     public static Object getSavedObject(String name) {
         Object result = savedObjects.get().get(name.toLowerCase());
-        LOG.info("Происходит возвращение объекта \""+name+"\" из контекста");
+        LOG.info("Происходит возвращение объекта \"" + name + "\" из контекста");
         if (result == null) {
             LOG.error("Can not find object {}. Please check object name.", name);
             throw new ParserException("Can not find object " + name + ". Please check object name.");
@@ -99,7 +100,8 @@ public class Context {
 
     /**
      * Сохраняет переменной
-     * @param key переменная
+     *
+     * @param key   переменная
      * @param value значение
      */
     public static void saveLocalVariable(String key, String value) {

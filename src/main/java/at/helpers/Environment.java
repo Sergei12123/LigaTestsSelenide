@@ -19,13 +19,13 @@ import java.util.Map;
 public class Environment {
     private String name;
     private Document document;
-    private Map<String,String> urls;
+    private Map<String, String> urls;
     private String[][] apps;
     public Map<String, Map<String, String>> databases = new HashMap();
     private User[] users;
     private Element environment;
 
-    public Environment(File document){
+    public Environment(File document) {
         setDocument(document);
         setAllData();
     }
@@ -42,22 +42,24 @@ public class Environment {
         }
 
     }
+
     private void setAllData() {
         this.setEnvironment("test-intranet");
         this.setEndpoints();
         this.setDatabaseProperties();
         this.setUsers();
     }
+
     private void setEnvironment(String environment) {
         Element root = this.document.getDocumentElement();
         NodeList nodeList = root.getElementsByTagName("environment");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            for(int i = 0; i < nodeList.getLength(); ++i) {
-                Element element = (Element)nodeList.item(i);
+            for (int i = 0; i < nodeList.getLength(); ++i) {
+                Element element = (Element) nodeList.item(i);
                 String name = element.getAttribute("name");
                 if (name != null && name.equalsIgnoreCase(environment)) {
                     this.environment = element;
-                    this.name=name;
+                    this.name = name;
                 }
             }
 
@@ -75,9 +77,9 @@ public class Environment {
     private void setDatabaseProperties() {
         NodeList nodeList = this.environment.getElementsByTagName("databases");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            NodeList databases = ((Element)nodeList.item(0)).getElementsByTagName("database");
+            NodeList databases = ((Element) nodeList.item(0)).getElementsByTagName("database");
 
-            for(int i = 0; i < databases.getLength(); ++i) {
+            for (int i = 0; i < databases.getLength(); ++i) {
                 Node database = databases.item(i);
                 Map<String, String> databaseParameters = new HashMap();
                 databaseParameters.put("serviceName", this.getTagValue(database, "serviceName"));
@@ -101,12 +103,12 @@ public class Environment {
     private void setUsers() {
         NodeList nodeList = this.environment.getElementsByTagName("users");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            NodeList users = ((Element)nodeList.item(0)).getElementsByTagName("user");
+            NodeList users = ((Element) nodeList.item(0)).getElementsByTagName("user");
             this.users = new User[nodeList.getLength()];
 
-            for(int i = 0; i < users.getLength(); ++i) {
+            for (int i = 0; i < users.getLength(); ++i) {
                 Node user = users.item(i);
-                this.users[i]=new User(this.getTagAttribute(user, "alias"),
+                this.users[i] = new User(this.getTagAttribute(user, "alias"),
                         this.getTagValue(user, "name"),
                         this.getTagValue(user, "password"),
                         this.getTagValue(user, "role"));
@@ -118,15 +120,15 @@ public class Environment {
     }
 
     private String getTagAttribute(Node node, String attribute) {
-        return ((Element)node).getAttribute(attribute);
+        return ((Element) node).getAttribute(attribute);
     }
 
     private void setEndpoints() {
         NodeList nodeList = this.environment.getElementsByTagName("endpoints");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            NodeList urls = ((Element)nodeList.item(0)).getElementsByTagName("endpoint");
-            this.urls=new HashMap<>();
-            for(int i = 0; i < urls.getLength(); ++i) {
+            NodeList urls = ((Element) nodeList.item(0)).getElementsByTagName("endpoint");
+            this.urls = new HashMap<>();
+            for (int i = 0; i < urls.getLength(); ++i) {
                 Node url = urls.item(i);
                 this.urls.put(this.getTagAttribute(url, "alias"),
                         this.getTagValue(url));
@@ -138,7 +140,7 @@ public class Environment {
     }
 
     private String getTagValue(Node node, String tagName) {
-        NodeList nodeList = ((Element)node).getElementsByTagName(tagName);
+        NodeList nodeList = ((Element) node).getElementsByTagName(tagName);
         if (nodeList != null && nodeList.getLength() >= 1) {
             return this.getTagValue(nodeList.item(0));
         } else {
@@ -152,17 +154,18 @@ public class Environment {
         return node.getFirstChild() != null ? node.getFirstChild().getNodeValue() : null;
     }
 
-    public Environment(Map<String, String> mainUrl, String[][] apps,User[] users){
-        this.urls =mainUrl;
-        this.apps =apps;
-        this.users =users;
+    public Environment(Map<String, String> mainUrl, String[][] apps, User[] users) {
+        this.urls = mainUrl;
+        this.apps = apps;
+        this.users = users;
     }
+
     private void getEnvironment(String environment) {
         Element root = this.document.getDocumentElement();
         NodeList nodeList = root.getElementsByTagName("environment");
         if (nodeList != null && nodeList.getLength() >= 1) {
-            for(int i = 0; i < nodeList.getLength(); ++i) {
-                Element element = (Element)nodeList.item(i);
+            for (int i = 0; i < nodeList.getLength(); ++i) {
+                Element element = (Element) nodeList.item(i);
                 String name = element.getAttribute("name");
                 if (name != null && name.equalsIgnoreCase(environment)) {
                     this.environment = element;

@@ -23,9 +23,9 @@ public interface IDatabase {
     /**
      * Обновления поля выбранной записи текущей таблицы
      *
-     * @param rowId Идентификатор записи
+     * @param rowId  Идентификатор записи
      * @param column Название реквизита
-     * @param value Значение реквизита
+     * @param value  Значение реквизита
      */
     void setColumn(String rowId, String column, String value);
 }

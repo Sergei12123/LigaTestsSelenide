@@ -3,6 +3,7 @@ package at.utils.allure;
 
 import io.qameta.allure.Attachment;
 import io.qameta.allure.Step;
+
 public class AllureReport {
     public AllureReport() {
     }

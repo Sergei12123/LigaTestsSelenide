@@ -2,7 +2,6 @@ package at.exceptions;
 
 /**
  * Класс исключение ParserException
- *
  */
 public class ParserException extends RuntimeException {
 

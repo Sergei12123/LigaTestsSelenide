@@ -27,9 +27,9 @@ public class AllureHelper {
     /**
      * Выполнение методов с указанием шага
      *
-     * @param name название шага allure
+     * @param name   название шага allure
      * @param method выполнение метода
-     * @param <T> объект
+     * @param <T>    объект
      * @return T - результат
      */
     public static <T> T execIgnoreException(String name, Supplier<T> method) {
@@ -49,7 +49,6 @@ public class AllureHelper {
 
     /**
      * Добавление скриншота и исходный код страницы в отчет после упавшего теста
-     *
      */
     public static void addAttachmentsToCase() {
         byte[] screenshot = ((TakesScreenshot) getWebDriver()).getScreenshotAs(OutputType.BYTES);
@@ -64,6 +63,7 @@ public class AllureHelper {
     public static byte[] screenshot() {
         return ((TakesScreenshot) getWebDriver()).getScreenshotAs(OutputType.BYTES);
     }
+
     /**
      * Добавление информационного текста в отчет
      *
@@ -78,7 +78,7 @@ public class AllureHelper {
      * Создание XML файла в отчете
      *
      * @param name Название
-     * @param xml текст xml
+     * @param xml  текст xml
      * @return String - текст xml
      */
     @Attachment(value = "{0}", type = "text/xml")
@@ -102,7 +102,7 @@ public class AllureHelper {
      * Создание PDF файла в отчете
      *
      * @param name Название
-     * @param pdf содержимое pdf
+     * @param pdf  содержимое pdf
      * @return byte - файл в байтах
      */
     @Attachment(value = "{0}", type = "application/pdf")
@@ -113,7 +113,7 @@ public class AllureHelper {
     /**
      * Создание JPEG файла в отчете
      *
-     * @param name Название
+     * @param name  Название
      * @param image изображение
      * @return byte - файл в байтах
      */

@@ -2,7 +2,6 @@ package at.exceptions;
 
 /**
  * Класс исключение StepNotImplementedException
- *
  */
 public class StepNotImplementedException extends RuntimeException {
 

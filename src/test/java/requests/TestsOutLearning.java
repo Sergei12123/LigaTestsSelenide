@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 
 
-
 @Epic("Заявки")
 @Story("Заявка на внешнее обучение")
 @ExtendWith({MyTestWatcher.class, Hook.class})
@@ -31,11 +30,11 @@ public class TestsOutLearning {
     @Order(1)
     @Ready
     @Test
-    public void testOutLearning(){
+    public void testOutLearning() {
         PreconditionsSteps.existsProduct(Category.REQUEST, SubCategory.OUT_LEARNING);
-        UniversalSteps.userLoginWithRole("Администратор","Intranet");
-        UniversalSteps.loginOnBehalf("Intranet","Пронин Алексей");
-        UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST,SubCategory.OUT_LEARNING);
+        UniversalSteps.userLoginWithRole("Администратор", "Intranet");
+        UniversalSteps.loginOnBehalf("Intranet", "Пронин Алексей");
+        UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST, SubCategory.OUT_LEARNING);
         RequestSteps.beginNewRequest();
         RequestSteps.setOutLearningData(
                 "тест",
@@ -48,8 +47,8 @@ public class TestsOutLearning {
                 10000);
         RequestSteps.createRequest();
         RequestSteps.checkStatus("На согласовании у менеджера");
-        UniversalSteps.userLoginWithRole("Администратор","Intranet");
-        UniversalSteps.loginOnBehalf("Intranet","Михайлов Владислав");
+        UniversalSteps.userLoginWithRole("Администратор", "Intranet");
+        UniversalSteps.loginOnBehalf("Intranet", "Михайлов Владислав");
         UniversalSteps.goToPageByCategoryAndSubCategory(Category.REQUEST, SubCategory.OUT_LEARNING);
         RequestSteps.cancelRequest("Менеджер");
         RequestSteps.checkStatus("Заявка отклонена");

@@ -36,15 +36,13 @@ public class Hook implements BeforeEachCallback {
      */
     @Step("Инициализация браузера")
     public void initializeWD() {
-        Configuration.timeout=10000;
+        Configuration.timeout = 10000;
         HookHelper.clearWebDriver();
         HookHelper.initWebDriver();
     }
 
     /**
      * Вывод контекста и приложить скриншот в случае ошибки
-     *
-     *
      */
     @Step("Дополнительная информация")
     public void addInformation() {

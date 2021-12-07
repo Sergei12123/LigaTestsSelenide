@@ -10,7 +10,7 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class IntranetLoginPage {
     @Step("Произвести авторизацию на портале \"Intranet\"")
-    public void login(User user,String url){
+    public void login(User user, String url) {
         open(url);
         $(byId("login")).setValue(user.getLogin());
         $(byId("pass")).setValue(user.getPassword()).pressEnter();
